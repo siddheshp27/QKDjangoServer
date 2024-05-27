@@ -1,6 +1,7 @@
 # myapi/views.py
 
 from rest_framework import status
+from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from qiskit import QuantumCircuit, transpile, assemble
@@ -60,10 +61,7 @@ def error_correction(sifted_key_sender, sifted_key_receiver):
             corrected_key.append(s)
     return corrected_key
 
-
-
-@api_view(['GET'])
-def createQuantumKeys(request):
+def quantumKeyGenerator():
     simulator = Aer.get_backend('qasm_simulator')
 
     # Step 1: Sender generates key and bases
@@ -114,7 +112,20 @@ def createQuantumKeys(request):
 
     # The final corrected key is now ready for use
     final_key = corrected_key
-    print(f"Final Key: {final_key}")
+    final_key_string = ""
+    for char in final_key:
+        final_key_string += str(char)  
+    print(f"Final Key: {final_key_string}")
+    return final_key_string
 
-    return Response("HELLO", status=status.HTTP_201_CREATED)
+
+
+
+@api_view(['GET'])
+def createQuantumKeys(request):
+    keystrarr = []
+    for i in range(10):
+        keystrarr.append(quantumKeyGenerator())
+    print(keystrarr)
+    return JsonResponse(keystrarr, safe=False)
 
