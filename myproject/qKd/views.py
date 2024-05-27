@@ -8,6 +8,7 @@ from qiskit import QuantumCircuit, transpile, assemble
 from qiskit_aer import Aer
 from qiskit.visualization import plot_histogram
 import random
+import base64
 
 
 KEY_LENGTH = 100
@@ -118,14 +119,21 @@ def quantumKeyGenerator():
     print(f"Final Key: {final_key_string}")
     return final_key_string
 
-
+def pad_key(key, length):
+    if len(key) >= length:
+        return key[:length]
+    else:
+        return key.ljust(length, '0')
 
 
 @api_view(['GET'])
 def createQuantumKeys(request):
     keystrarr = []
     for i in range(10):
-        keystrarr.append(quantumKeyGenerator())
+        key = quantumKeyGenerator()
+        padded_key = pad_key(key, 256)
+        base64_key = base64.b64encode(padded_key.encode()).decode()
+        keystrarr.append(base64_key)
     print(keystrarr)
     return JsonResponse(keystrarr, safe=False)
 
